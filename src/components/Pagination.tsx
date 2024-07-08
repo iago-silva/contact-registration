@@ -28,17 +28,27 @@ export default function Pagination({page, setPage, totalPages}) {
           variant="outlined"
           color="neutral"
           size="sm"
+          onClick={() => { 
+            if (page > 1) {
+              setPage(page-1) 
+            }
+          }}
         >
           <ArrowBackIosRoundedIcon />
         </IconButton>
         <Typography level="body-sm" mx="auto">
-          Page 1 of 10
+          Page {page} of {totalPages}
         </Typography>
         <IconButton
           aria-label="next page"
           variant="outlined"
           color="neutral"
           size="sm"
+          onClick={() => { 
+            if (page < totalPages) {
+              setPage(page+1) 
+            }
+          }}
         >
           <ArrowForwardIosRoundedIcon />
         </IconButton>
