@@ -1,5 +1,5 @@
 import * as React from 'react';
-import { Box, Button, DialogActions, DialogContent, DialogTitle, Divider, Dropdown, FormControl, FormLabel, IconButton, Input, Menu, MenuButton, MenuItem, Modal, ModalClose, ModalDialog } from '@mui/joy';
+import { Alert, Box, Button, DialogActions, DialogContent, DialogTitle, Divider, Dropdown, FormControl, FormLabel, IconButton, Input, Menu, MenuButton, MenuItem, Modal, ModalClose, ModalDialog } from '@mui/joy';
 import Typography from '@mui/joy/Typography';
 import Avatar from '@mui/joy/Avatar';
 import MapsHomeWorkIcon from '@mui/icons-material/MapsHomeWork';
@@ -10,6 +10,8 @@ import { cleanup } from '@testing-library/react';
 export default function HeaderSection() {
   const [modalOpen, setModalOpen] = React.useState(false)
   const [password, setPassword] = React.useState('')
+  const [showAlert, setShowAlert] = React.useState(false)
+  const [alertMessage, setAlertMessage] = React.useState("")
 
   const navigate = useNavigate()
   
@@ -31,11 +33,7 @@ export default function HeaderSection() {
     navigate("/entrar")
   }
 
-  const handleDeleteAccount = () => {
-    setModalOpen(false)
-
-    // first try loguin with password
-
+  const fetchDeleteAccount = () => {
     fetch(`http://localhost:3001/auth`, {
       method: "DELETE",
       headers: {
@@ -47,7 +45,30 @@ export default function HeaderSection() {
       if (response.status !== 401) {
         clean()
       } else {
-        // delete failed
+        setModalOpen(true)
+        setAlertMessage('Erro ao excluir a conta!')
+        setShowAlert(true)
+      }
+    })
+  }
+
+  const handleDeleteAccount = () => {
+    setModalOpen(false)
+
+    fetch("http://localhost:3001/auth/sign_in", {
+      method: "POST",
+      headers: {
+        'Content-Type': 'application/json'
+      },
+      body: JSON.stringify({ email: uid, password: password }),
+    })
+    .then(response => {
+      if (response.status === 401) {
+        setModalOpen(true)
+        setAlertMessage('Senha inválida!')
+        setShowAlert(true)
+      } else {
+        fetchDeleteAccount()
       }
     })
   }
@@ -133,6 +154,13 @@ export default function HeaderSection() {
               <FormLabel>Senha</FormLabel>
               <Input type='password' required value={password} onChange={event => { setPassword(event.target.value) }} />
             </FormControl>
+            {showAlert && (
+              <Alert 
+                variant="soft"
+                color="danger"
+                sx={{mt: 1}}
+              >{alertMessage}</Alert>
+            )}
           </DialogContent>
           <DialogActions>
             <Button variant="solid" color="danger" onClick={() => handleDeleteAccount()}>

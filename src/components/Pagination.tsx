@@ -15,6 +15,7 @@ export default function Pagination({page, setPage, totalPages}) {
     <div>
       <Box
         className="Pagination-mobile"
+        mt="auto"
         sx={{
           display: { xs: 'flex', md: 'none' },
           alignItems: 'center',

@@ -13,10 +13,14 @@ import Pagination from '../components/Pagination.tsx';
 import { useNavigate } from 'react-router-dom';
 import RegisterContactModal from '../components/RegisterContactModal.tsx';
 import { APIProvider, Map, Marker, useMap } from '@vis.gl/react-google-maps';
+import { Button, DialogActions, DialogContent, DialogTitle, Divider, FormControl, FormLabel, Input, Modal, ModalDialog } from '@mui/joy';
+import ContactModal from '../components/ContactModal.tsx';
 
 export default function Dashboard() {
   const [contacts, setContacts] = React.useState([])
   const [modalOpen, setModalOpen] = React.useState(false)
+  const [contactModalOpen, setContactModalOpen] = React.useState(false)
+  const [selectedContact, setSelectedContact] = React.useState(null)
   const [markerPosition, setMarkerPosition] = React.useState<{lat: number, lng:  number} | null>(null)
   const [order, setOrder] = React.useState('asc')
   const [searchTerm, setSearchTerm] = React.useState('')
@@ -48,19 +52,22 @@ export default function Dashboard() {
       }
     })
     .then(response => {
+      const uid = response.headers.get('uid')
+      const client = response.headers.get('client')
+      const accessToken = response.headers.get('access-token')
+
+      if (uid && client && accessToken) {
+        localStorage.setItem('uid', uid || "");
+        localStorage.setItem('client', client || "");
+        localStorage.setItem('accessToken', accessToken || "");
+      }
+
+      return response
+    })
+    .then(response => {
       if (response.status == 401) {
         clean()
       } else {
-        const uid = response.headers.get('uid')
-        const client = response.headers.get('client')
-        const accessToken = response.headers.get('access-token')
-
-        if (uid && client && accessToken) {
-          localStorage.setItem('uid', uid || "");
-          localStorage.setItem('client', client || "");
-          localStorage.setItem('accessToken', accessToken || "");
-        }
-
         return response.json()
       }
     })
@@ -78,7 +85,7 @@ export default function Dashboard() {
 
   React.useEffect(() => {
     fetchContacts()
-  }, [order, page])
+  }, [order, page, searchTerm])
 
 
   const map = useMap()
@@ -88,11 +95,12 @@ export default function Dashboard() {
   }
 
   const cards = contacts?.map(contact => {
-    const position = {lat: parseFloat(contact['address']['latitude']), lng: parseFloat(contact['address']['longitude'])}
-
     return <RentalCard
       contact={contact}
-      onClick={() => { setMarkerPosition(position); map?.setZoom(13.96); map?.setCenter(position)}}
+      onClick={() => { 
+        setSelectedContact(contact)
+        setContactModalOpen(true)
+      }}
       key={contact['cpf']}
     />
   })
@@ -117,6 +125,7 @@ export default function Dashboard() {
             py: 2,
             borderBottom: '1px solid',
             borderColor: 'divider',
+            minHeigh: '100%'
           }}
         >
           <HeaderSection />
@@ -153,7 +162,66 @@ export default function Dashboard() {
         {/* )} */}
       </Box>
 
-      <RegisterContactModal fetchContacts={fetchContacts} modalOpen={modalOpen} setModalOpen={setModalOpen} />
+      <RegisterContactModal onClose={() => { console.log('uhul'); setSelectedContact(null) }} selectedContact={selectedContact} fetchContacts={fetchContacts} modalOpen={modalOpen} setModalOpen={setModalOpen} />
+
+      <ContactModal 
+        contact={selectedContact} 
+        contactModalOpen={contactModalOpen} 
+        setContactModalOpen={setContactModalOpen} 
+        onClose={() => { setSelectedContact(null) }}
+        onMarkerClick={() => {
+          if (selectedContact) {
+            const position = {
+              lat: parseFloat(selectedContact['address']['latitude']), 
+              lng: parseFloat(selectedContact['address']['longitude'])
+            }
+
+            setMarkerPosition(position)
+
+            map?.setZoom(13.96)
+            map?.setCenter(position)
+          }
+
+          setSelectedContact(null)
+        }}
+        onDeleteClick={() => {
+          fetch(`http://localhost:3001/api/v1/contacts/${selectedContact.id}`, {
+            method: "DELETE",
+            headers: {
+              'Content-Type': 'application/json',
+              'client': client || '',
+              'uid': uid || '',
+              'access-token': accessToken || ''
+            }
+          })
+          .then(response => {
+            const uid = response.headers.get('uid')
+            const client = response.headers.get('client')
+            const accessToken = response.headers.get('access-token')
+
+            if (uid && client && accessToken) {
+              localStorage.setItem('uid', uid || "");
+              localStorage.setItem('client', client || "");
+              localStorage.setItem('accessToken', accessToken || "");
+            }
+
+            return response
+          })
+          .then(response => {
+            if (response.status == 401) {
+              clean()
+            } else {
+              setPage(1)
+              fetchContacts()
+            }
+          })
+
+          setSelectedContact(null)
+        }}
+        onEditClick={() => {
+          setModalOpen(true)
+        }}
+      />
     </CssVarsProvider>
   );
 }

@@ -26,6 +26,7 @@ export default function RentalCard({contact, onClick}) {
       orientation="horizontal"
       onClick={() => { onClick() }}
       sx={{
+        gap: '0',
         bgcolor: 'neutral.softBg',
         display: 'flex',
         flexDirection: { xs: 'column', sm: 'row' },
@@ -37,7 +38,6 @@ export default function RentalCard({contact, onClick}) {
     >
       <CardOverflow
         sx={{
-          mr: { xs: 'var(--CardOverflow-offset)', sm: 0 },
           mb: { xs: 0, sm: 'var(--CardOverflow-offset)' },
           '--AspectRatio-radius': {
             xs: 'calc(var(--CardOverflow-radius) - var(--variant-borderWidth, 0px)) calc(var(--CardOverflow-radius) - var(--variant-borderWidth, 0px)) 0 0',
@@ -56,18 +56,16 @@ export default function RentalCard({contact, onClick}) {
           <Box display={"flex"} justifyContent={"center"} alignItems={"center"}>
             <img alt="" style={{maxHeight: '100px', maxWidth: '100px'}} src={"https://cdn.icon-icons.com/icons2/1509/PNG/512/contactnew_104150.png"} />
           </Box>
-         
         </AspectRatio>
       </CardOverflow>
-      <CardContent>
+      <CardContent sx={{justifyContent: "center"}}>
             <Typography textAlign={"start"} level="body-sm">{contact.name}</Typography>
-            <Typography textAlign={"start"} level="body-sm">{contact.cpf}</Typography>
-            <Typography textAlign={"start"} level="body-sm">{contact.phone}</Typography>
+            <Typography textAlign={"start"} level="body-sm"><strong>CPF:</strong> {contact.cpf}</Typography>
+            <Typography textAlign={"start"} level="body-sm"><strong>Phone:</strong> {contact.phone}</Typography>
             <Typography  textAlign={"start"}level="title-md">
               <Link
                 overlay
                 underline="none"
-                href="#interactive-card"
                 sx={{ color: 'text.primary' }}
               >
                 {`${contact?.address.street}, ${contact?.address.number}, ${contact?.address.neighborhood}, ${contact.address.city}-${contact.address.state}`}

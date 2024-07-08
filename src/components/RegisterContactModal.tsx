@@ -3,7 +3,7 @@ import React, { useEffect, useState } from 'react'
 import { fromAddress, fromLatLng, setKey } from 'react-geocode';
 import { useNavigate } from 'react-router-dom';
 
-function RegisterContactModal({fetchContacts, modalOpen, setModalOpen}) {
+function RegisterContactModal({onClose, selectedContact, fetchContacts, modalOpen, setModalOpen}) {
   const [name, setName] = useState("")
   const [cpf, setCpf] = useState("")
   const [phone, setPhone] = useState("")
@@ -37,6 +37,91 @@ function RegisterContactModal({fetchContacts, modalOpen, setModalOpen}) {
     navigate("/entrar")
   }
 
+  useEffect(() => {
+    setName(selectedContact?.name)
+    setCpf(selectedContact?.cpf)
+    setPhone(selectedContact?.phone)
+
+    setZipcode(selectedContact?.address.zipcode)
+    setNumber(selectedContact?.address.number)
+    setStreet(selectedContact?.address.street)
+    setNeighborhood(selectedContact?.address.neighborhood)
+    setCity(selectedContact?.address.city)
+    setState(selectedContact?.address.state)
+    setComplement(selectedContact?.address.complement)
+    setLatitude(selectedContact?.address.latitude)
+    setLongitude(selectedContact?.address.longitude)
+  }, [selectedContact])
+
+  const fetchCreate = (params) => {
+    fetch(`http://localhost:3001/api/v1/contacts`, {
+      method: "POST",
+      headers: {
+        'Content-Type': 'application/json',
+        'client': client || '',
+        'uid': uid || '',
+        'access-token': accessToken || ''
+      },
+      body: JSON.stringify(params)
+    })
+    .then(response => {
+      const uid = response.headers.get('uid')
+      const client = response.headers.get('client')
+      const accessToken = response.headers.get('access-token')
+
+      if (uid && client && accessToken) {
+        localStorage.setItem('uid', uid || "");
+        localStorage.setItem('client', client || "");
+        localStorage.setItem('accessToken', accessToken || "");
+      }
+
+      return response
+    })
+    .then(response => {
+      if (response.status == 401) {
+        clean()
+      } else {
+        fetchContacts()
+        setModalOpen(false)
+      }
+    })
+  }
+
+  const fetchUpdate = (params) => {
+    fetch(`http://localhost:3001/api/v1/contacts/${selectedContact?.id}`, {
+      method: "PUT",
+      headers: {
+        'Content-Type': 'application/json',
+        'client': client || '',
+        'uid': uid || '',
+        'access-token': accessToken || ''
+      },
+      body: JSON.stringify(params)
+    })
+    .then(response => {
+      const uid = response.headers.get('uid')
+      const client = response.headers.get('client')
+      const accessToken = response.headers.get('access-token')
+
+      if (uid && client && accessToken) {
+        localStorage.setItem('uid', uid || "");
+        localStorage.setItem('client', client || "");
+        localStorage.setItem('accessToken', accessToken || "");
+      }
+
+      return response
+    })
+    .then(response => {
+      if (response.status == 401) {
+        clean()
+      } else {
+        fetchContacts()
+        onClose()
+        setModalOpen(false)
+      }
+    })
+  }
+
   const registerInApi = async () => {
     const params = {
       contact: {
@@ -57,24 +142,11 @@ function RegisterContactModal({fetchContacts, modalOpen, setModalOpen}) {
       }
     }
 
-    fetch(`http://localhost:3001/api/v1/contacts`, {
-      method: "POST",
-      headers: {
-        'Content-Type': 'application/json',
-        'client': client || '',
-        'uid': uid || '',
-        'access-token': accessToken || ''
-      },
-      body: JSON.stringify(params)
-    })
-    .then(response => {
-      if (response.status == 401) {
-        clean()
-      } else {
-        fetchContacts()
-        setModalOpen(false)
-      }
-    })
+    if (!selectedContact) {
+      fetchCreate(params)
+    } else {
+      fetchUpdate(params)
+    }
   }
 
   const handleChangeSelect = (_, object) => {
@@ -90,6 +162,19 @@ function RegisterContactModal({fetchContacts, modalOpen, setModalOpen}) {
       },
     })
     .then(response => {
+      const uid = response.headers.get('uid')
+      const client = response.headers.get('client')
+      const accessToken = response.headers.get('access-token')
+
+      if (uid && client && accessToken) {
+        localStorage.setItem('uid', uid || "");
+        localStorage.setItem('client', client || "");
+        localStorage.setItem('accessToken', accessToken || "");
+      }
+
+      return response
+    })
+    .then(response => {
       if (response.status == 401) {
         clean()
       } else {
@@ -97,14 +182,16 @@ function RegisterContactModal({fetchContacts, modalOpen, setModalOpen}) {
       }
     })
     .then(data => {
-      setStreet(data?.logradouro)
-      setNeighborhood(data?.bairro)
-      setZipcode(data?.cep)
-      setComplement(data?.complemento)
-      setCity(data?.localidade)
-      setState(data?.uf)
-      setLatitude(object?.lat)
-      setLongitude(object?.lng)
+      if (data) {
+        setStreet(data?.logradouro)
+        setNeighborhood(data?.bairro)
+        setZipcode(data?.cep)
+        setComplement(data?.complemento)
+        setCity(data?.localidade)
+        setState(data?.uf)
+        setLatitude(object?.lat)
+        setLongitude(object?.lng)
+      }
     })
   }
 
@@ -142,9 +229,9 @@ function RegisterContactModal({fetchContacts, modalOpen, setModalOpen}) {
 
   return (
     <div>
-       <Modal open={modalOpen} onClose={() => setModalOpen(false)}>
+       <Modal open={modalOpen} onClose={() => {setModalOpen(false); onClose()}}>
         <ModalDialog sx={{height: "75%", width: "50%"}}>
-          <DialogTitle>Novo Contato</DialogTitle>
+          <DialogTitle>{selectedContact?.name || "Novo Contato"} </DialogTitle>
           <DialogContent>
             <form
               onSubmit={(event: React.FormEvent<HTMLFormElement>) => {
@@ -171,7 +258,7 @@ function RegisterContactModal({fetchContacts, modalOpen, setModalOpen}) {
                 <FormControl>
                   <FormLabel>Pesquisar endereço</FormLabel>
                   <Autocomplete
-                    required
+                    required={!selectedContact}
                     placeholder="comece a digitar partes do endereço"
                     options={addressesOptions}
                     onInputChange={handleAutocompleteChange}

@@ -27,9 +27,6 @@ export default function Search({contacts, setPage, searchTerm, setSearchTerm, fe
               aria-label="Search"
             />
           </FormControl>
-          <Button variant="solid" color="primary" onClick={() => { setPage(0); fetchContacts() }}>
-            Pesquisar
-          </Button>
         </Stack>
       </form>
     </div>
