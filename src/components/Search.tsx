@@ -6,24 +6,32 @@ import Stack from '@mui/joy/Stack';
 import SearchRoundedIcon from '@mui/icons-material/SearchRounded';
 import Typography from '@mui/joy/Typography';
 
-export default function Search({contacts, searchTerm, setSearchTerm, fetchContacts}) {
+
+export default function Search({contacts, setPage, searchTerm, setSearchTerm, fetchContacts}) {
   return (
     <div>
-      <Stack spacing={1} direction="row" sx={{ mb: 2 }}>
-        <FormControl sx={{ flex: 1 }}>
-          <Input
-            placeholder="Pesquise contatos por nome ou CPF"
-            startDecorator={<SearchRoundedIcon />}
-            value={searchTerm}
-            onChange={event => {setSearchTerm(event.target.value)}}
-            aria-label="Search"
-          />
-        </FormControl>
-        <Button variant="solid" color="primary" onClick={() => { fetchContacts() }}>
-          Pesquisar
-        </Button>
-      </Stack>
-      <Typography level="body-sm">{contacts?.length} contatos</Typography>
+      <form
+        onSubmit={event => {
+          event.preventDefault();
+          fetchContacts()
+        }}
+      >
+        <Stack spacing={1} direction="row" sx={{ mb: 2 }}>
+          <FormControl sx={{ flex: 1 }}>
+            <Input
+              placeholder="Pesquise contatos por nome ou CPF"
+              startDecorator={<SearchRoundedIcon />}
+              value={searchTerm}
+              name='search'
+              onChange={event => {setSearchTerm(event.target.value)}}
+              aria-label="Search"
+            />
+          </FormControl>
+          <Button variant="solid" color="primary" onClick={() => { setPage(0); fetchContacts() }}>
+            Pesquisar
+          </Button>
+        </Stack>
+      </form>
     </div>
   );
 }

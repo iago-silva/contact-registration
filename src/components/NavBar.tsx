@@ -107,11 +107,6 @@ export default function HeaderSection() {
             display: { xs: 'none', sm: 'flex' },
           }}
         >
-          <Avatar
-            variant="outlined"
-            size="sm"
-            src="https://thumbs.dreamstime.com/b/user-profile-grey-icon-web-avatar-employee-symbol-user-profile-grey-icon-web-avatar-employee-symbol-sign-illustration-design-191067342.jpg"
-          />
           <Box sx={{ minWidth: 0, flex: 1 }}>
           <Dropdown>
             <MenuButton>

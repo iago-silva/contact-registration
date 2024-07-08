@@ -6,7 +6,11 @@ import Typography from '@mui/joy/Typography';
 import ArrowBackIosRoundedIcon from '@mui/icons-material/ArrowBackIosRounded';
 import ArrowForwardIosRoundedIcon from '@mui/icons-material/ArrowForwardIosRounded';
 
-export default function Pagination() {
+const CONTACTS_PER_PAGE = 3
+
+export default function Pagination({page, setPage, totalPages}) {
+  const pages = Array.from(Array(totalPages).keys())
+
   return (
     <div>
       <Box
@@ -52,14 +56,15 @@ export default function Pagination() {
         }}
       >
         <Box sx={{ flex: 1 }} />
-        {['1', '2', '3', '…', '8', '9', '10'].map((page) => (
+        {pages.map((index) => (
           <IconButton
-            key={page}
+            key={index}
             size="sm"
-            variant={Number(page) ? 'plain' : 'soft'}
+            variant={index + 1 === page ? 'soft' : 'plain'}
             color="neutral"
+            onClick={() => { setPage(index + 1) }}
           >
-            {page}
+            {index + 1}
           </IconButton>
         ))}
         <Box sx={{ flex: 1 }} />

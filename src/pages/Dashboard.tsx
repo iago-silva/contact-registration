@@ -20,13 +20,14 @@ export default function Dashboard() {
   const [markerPosition, setMarkerPosition] = React.useState<{lat: number, lng:  number} | null>(null)
   const [order, setOrder] = React.useState('asc')
   const [searchTerm, setSearchTerm] = React.useState('')
+  const [totalPages, setTotalPages] = React.useState(0)
+  const [page, setPage] = React.useState(1)
 
   const navigate = useNavigate()
 
   const client = localStorage.getItem('client') 
   const uid = localStorage.getItem('uid') 
   const accessToken = localStorage.getItem('accessToken') 
-  console.log(client, uid, accessToken)
 
   const clean = () => {
     localStorage.setItem('uid', "")
@@ -37,7 +38,7 @@ export default function Dashboard() {
   }
 
   const fetchContacts = () => {
-    fetch(`http://localhost:3001/api/v1/contacts?order=${order}&search=${searchTerm}`, {
+    fetch(`http://localhost:3001/api/v1/contacts?order=${order}&search=${searchTerm}&page=${page}`, {
       method: "GET",
       headers: {
         'Content-Type': 'application/json',
@@ -50,11 +51,24 @@ export default function Dashboard() {
       if (response.status == 401) {
         clean()
       } else {
+        const uid = response.headers.get('uid')
+        const client = response.headers.get('client')
+        const accessToken = response.headers.get('access-token')
+
+        if (uid && client && accessToken) {
+          localStorage.setItem('uid', uid || "");
+          localStorage.setItem('client', client || "");
+          localStorage.setItem('accessToken', accessToken || "");
+        }
+
         return response.json()
       }
     })
     .then(data => {
-      setContacts(data)
+      if (data) {
+        setContacts(data?.contacts)
+        setTotalPages(data?.total_pages)
+      }
     })
   }
 
@@ -64,7 +78,7 @@ export default function Dashboard() {
 
   React.useEffect(() => {
     fetchContacts()
-  }, [order])
+  }, [order, page])
 
 
   const map = useMap()
@@ -106,7 +120,7 @@ export default function Dashboard() {
           }}
         >
           <HeaderSection />
-          <Search contacts={contacts} searchTerm={searchTerm} setSearchTerm={setSearchTerm} fetchContacts={fetchContacts}/>
+          <Search contacts={contacts} setPage={setPage} searchTerm={searchTerm} setSearchTerm={setSearchTerm} fetchContacts={fetchContacts}/>
         </Stack>
         <Box
           sx={{
@@ -129,12 +143,14 @@ export default function Dashboard() {
             </Map>
         </Box>
         <Stack spacing={2} sx={{ px: { xs: 2, md: 4 }, pt: 2, minHeight: 0 }}>
-          <Filters setModalOpen={setModalOpen} setOrder={setOrder} searchTerm={searchTerm} setSearchTerm={setSearchTerm} />
+          <Filters setModalOpen={setModalOpen} order={order} setOrder={setOrder} searchTerm={searchTerm} setSearchTerm={setSearchTerm} />
           <Stack spacing={2} sx={{ overflow: 'auto' }}>
             {cards}
           </Stack>
         </Stack>
-        <Pagination />
+        {/* {contacts?.length > 10 && ( */}
+          <Pagination page={page} setPage={setPage} totalPages={totalPages} />
+        {/* )} */}
       </Box>
 
       <RegisterContactModal fetchContacts={fetchContacts} modalOpen={modalOpen} setModalOpen={setModalOpen} />

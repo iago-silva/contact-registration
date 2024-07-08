@@ -56,46 +56,10 @@ export default function RentalCard({contact, onClick}) {
           <Box display={"flex"} justifyContent={"center"} alignItems={"center"}>
             <img alt="" style={{maxHeight: '100px', maxWidth: '100px'}} src={"https://cdn.icon-icons.com/icons2/1509/PNG/512/contactnew_104150.png"} />
           </Box>
-          <Stack
-            alignItems="center"
-            direction="row"
-            sx={{ position: 'absolute', top: 0, width: '100%', p: 1 }}
-          >
-            {/* {rareFind && (
-              <Chip
-                variant="soft"
-                color="success"
-                startDecorator={<WorkspacePremiumRoundedIcon />}
-                size="md"
-              >
-                Rare find
-              </Chip>
-            )} */}
-            {/* <IconButton
-              variant="plain"
-              size="sm"
-              color={isLiked ? 'danger' : 'neutral'}
-              onClick={() => setIsLiked((prev) => !prev)}
-              sx={{
-                display: { xs: 'flex', sm: 'none' },
-                ml: 'auto',
-                borderRadius: '50%',
-                zIndex: '20',
-              }}
-            >
-              <FavoriteRoundedIcon />
-            </IconButton> */}
-          </Stack>
+         
         </AspectRatio>
       </CardOverflow>
       <CardContent>
-        <Stack
-          spacing={1}
-          direction="row"
-          justifyContent="space-between"
-          alignItems="flex-start"
-        >
-          <div>
             <Typography textAlign={"start"} level="body-sm">{contact.name}</Typography>
             <Typography textAlign={"start"} level="body-sm">{contact.cpf}</Typography>
             <Typography textAlign={"start"} level="body-sm">{contact.phone}</Typography>
@@ -109,8 +73,6 @@ export default function RentalCard({contact, onClick}) {
                 {`${contact?.address.street}, ${contact?.address.number}, ${contact?.address.neighborhood}, ${contact.address.city}-${contact.address.state}`}
               </Link>
             </Typography>
-          </div>
-        </Stack>
       </CardContent>
     </Card>
   );

@@ -18,7 +18,7 @@ function valueText(value: number) {
   return `$${value.toLocaleString('en-US')}`;
 }
 
-export default function Filters({setModalOpen, setOrder, searchTerm, setSearchTerm}) {
+export default function Filters({setModalOpen, order, setOrder, searchTerm, setSearchTerm}) {
   const [open, setOpen] = React.useState(false);
   return (
     <Stack
@@ -37,7 +37,7 @@ export default function Filters({setModalOpen, setOrder, searchTerm, setSearchTe
       >
         Novo Contato
       </Button>
-      <OrderSelector setOrder={setOrder} />
+      <OrderSelector order={order} setOrder={setOrder} />
       <Drawer open={open} onClose={() => setOpen(false)}>
         <Stack useFlexGap spacing={3} sx={{ p: 2 }}>
           <DialogTitle>Filters</DialogTitle>

@@ -5,7 +5,7 @@ import MenuItem from '@mui/joy/MenuItem';
 import ArrowDropDown from '@mui/icons-material/ArrowDropDown';
 import Dropdown from '@mui/joy/Dropdown';
 
-export default function OrderSelector({setOrder}) {
+export default function OrderSelector({order, setOrder}) {
   return (
     <Dropdown>
       <MenuButton
@@ -17,8 +17,8 @@ export default function OrderSelector({setOrder}) {
         Ordenar por
       </MenuButton>
       <Menu sx={{ minWidth: 120 }}>
-        <MenuItem onClick={() => { setOrder('asc') }}>Crescente</MenuItem>
-        <MenuItem onClick={() => { setOrder('desc') }}>Decrescente</MenuItem>
+        <MenuItem selected={order === 'asc'} onClick={() => { setOrder('asc') }}>Crescente</MenuItem>
+        <MenuItem selected={order === 'desc'} onClick={() => { setOrder('desc') }}>Decrescente</MenuItem>
       </Menu>
     </Dropdown>
   );
