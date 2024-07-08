@@ -83,9 +83,21 @@ function RegisterContactModal({onClose, selectedContact, fetchContacts, modalOpe
     .then(response => {
       if (response.status == 401) {
         clean()
+      } else if (response.status == 422) {
+        return response.json()
       } else {
         fetchContacts()
         setModalOpen(false)
+      }
+    })
+    .then(data => {
+      if (data && data['errors']) {
+        Object.keys(data['errors']).forEach(function(key, index) {
+          data['errors'][key] = key + ' ' + data['errors'][key];
+        });        
+
+        setAlertMessage(Object.values(data['errors']).join('. '))
+        setShowAlert(true)
       }
     })
   }
@@ -244,18 +256,16 @@ function RegisterContactModal({onClose, selectedContact, fetchContacts, modalOpe
 
   return (
     <div>
-       <Modal open={modalOpen} onClose={() => {setModalOpen(false); onClose()}}>
+       <Modal open={modalOpen} onClose={() => {setModalOpen(false); setAlertMessage(''); setShowAlert(false); onClose()}}>
         <ModalDialog sx={{height: "75%", width: "50%"}}>
           <DialogTitle>{selectedContact?.name || "Novo Contato"} </DialogTitle>
-          <DialogContent>
-
-            {showAlert && (
+          {showAlert && (
               <Alert 
                 variant="soft"
                 color="danger"
               >{alertMessage}</Alert>
             )}
-
+          <DialogContent>
             <form
               onSubmit={(event: React.FormEvent<HTMLFormElement>) => {
                 event.preventDefault();
