@@ -16,6 +16,8 @@ import Stack from '@mui/joy/Stack';
 import DarkModeRoundedIcon from '@mui/icons-material/DarkModeRounded';
 import LightModeRoundedIcon from '@mui/icons-material/LightModeRounded';
 import BadgeRoundedIcon from '@mui/icons-material/BadgeRounded';
+import { useNavigate } from 'react-router-dom';
+import { Alert } from '@mui/joy';
 
 interface FormElements extends HTMLFormControlsCollection {
   email: HTMLInputElement;
@@ -51,6 +53,48 @@ function ColorSchemeToggle(props: IconButtonProps) {
 }
 
 export default function Login() {
+  const navigate = useNavigate()
+  const [showAlert, setShowAlert] = React.useState(false)
+  const [alertMessage, setAlertMessage] = React.useState("")
+
+  const nagivate = useNavigate()
+
+  const handleSigninButton = (params) => {
+    fetch("http://localhost:3001/auth/sign_in", {
+      method: "POST",
+      headers: {
+        'Content-Type': 'application/json'
+      },
+      body: JSON.stringify(params),
+    })
+    .then(response => {
+      if (response.status === 401) {
+        return response.json()
+      } else {
+        const uid = response.headers.get('uid')
+        const client = response.headers.get('client')
+        const accessToken = response.headers.get('access-token')
+
+        if (uid && client && accessToken) {
+          localStorage.setItem('uid', uid || "");
+          localStorage.setItem('client', client || "");
+          localStorage.setItem('accessToken', accessToken || "");
+
+          navigate("/dashboard")
+        } else {
+          setAlertMessage("Problema no login!")
+          setShowAlert(true)
+        }
+      }
+    })
+    .then(data => {
+      if (data) {
+        setAlertMessage(data['errors'].join(". "))
+        setShowAlert(true)
+      }
+    })
+  }
+
   return (
     <CssVarsProvider defaultMode="dark" disableTransitionOnChange>
       <CssBaseline />
@@ -99,7 +143,7 @@ export default function Login() {
               <IconButton variant="soft" color="primary" size="sm">
                 <BadgeRoundedIcon />
               </IconButton>
-              <Typography level="title-lg">Contact Registration</Typography>
+              <Typography level="title-lg">Cadastro de Contatos</Typography>
             </Box>
             <ColorSchemeToggle />
           </Box>
@@ -129,12 +173,12 @@ export default function Login() {
             <Stack gap={4} sx={{ mb: 2 }}>
               <Stack gap={1}>
                 <Typography component="h1" level="h3">
-                  Sign in
+                  Entrar
                 </Typography>
                 <Typography level="body-sm">
-                  New to company?{' '}
+                  Novo?{' '}
                   <Link href="/signup" level="title-sm">
-                    Sign up!
+                    Cadastre-se
                   </Link>
                 </Typography>
               </Stack>
@@ -153,12 +197,12 @@ export default function Login() {
                 onSubmit={(event: React.FormEvent<SignInFormElement>) => {
                   event.preventDefault();
                   const formElements = event.currentTarget.elements;
-                  const data = {
+                  const params = {
                     email: formElements.email.value,
                     password: formElements.password.value,
-                    persistent: formElements.persistent.checked,
                   };
-                  alert(JSON.stringify(data, null, 2));
+
+                  handleSigninButton(params) 
                 }}
               >
                 <FormControl required>
@@ -166,7 +210,7 @@ export default function Login() {
                   <Input type="email" name="email" />
                 </FormControl>
                 <FormControl required>
-                  <FormLabel>Password</FormLabel>
+                  <FormLabel>Senha</FormLabel>
                   <Input type="password" name="password" />
                 </FormControl>
                 <Stack gap={4} sx={{ mt: 2 }}>
@@ -177,21 +221,27 @@ export default function Login() {
                       alignItems: 'center',
                     }}
                   >
-                    <Checkbox size="sm" label="Remember me" name="persistent" />
+                    <div></div>
                     <Link level="title-sm" href="recover-passoword">
-                      Forgot your password?
+                      Esqueceu sua senha?
                     </Link>
                   </Box>
                   <Button type="submit" fullWidth>
-                    Sign in
+                    Login
                   </Button>
+                  {showAlert && (
+                    <Alert 
+                      variant="soft"
+                      color="danger"
+                    >{alertMessage}</Alert>
+                  )}
                 </Stack>
               </form>
             </Stack>
           </Box>
           <Box component="footer" sx={{ py: 3 }}>
             <Typography level="body-xs" textAlign="center">
-              © Your company {new Date().getFullYear()}
+              © Iago Silva {new Date().getFullYear()}
             </Typography>
           </Box>
         </Box>

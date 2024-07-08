@@ -3,12 +3,16 @@ import ReactDOM from 'react-dom/client';
 import './index.css';
 import App from './App';
 import reportWebVitals from './reportWebVitals';
+import { APIProvider } from '@vis.gl/react-google-maps';
 
 const root = ReactDOM.createRoot(document.getElementById('root'));
 root.render(
-  <React.StrictMode>
+  // <React.StrictMode>
+
+  <APIProvider apiKey={'AIzaSyCSShSwdzxzjX0bRt3NsO3u12G7oPvnHBQ'}>
     <App />
-  </React.StrictMode>
+  </APIProvider>
+  // </React.StrictMode>
 );
 
 // If you want to start measuring performance in your app, pass a function

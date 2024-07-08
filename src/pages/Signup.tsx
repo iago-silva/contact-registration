@@ -16,11 +16,14 @@ import Stack from '@mui/joy/Stack';
 import DarkModeRoundedIcon from '@mui/icons-material/DarkModeRounded';
 import LightModeRoundedIcon from '@mui/icons-material/LightModeRounded';
 import BadgeRoundedIcon from '@mui/icons-material/BadgeRounded';
+import { Password } from '@mui/icons-material';
+import { useNavigate } from 'react-router-dom';
+import { Alert } from '@mui/joy';
 
 interface FormElements extends HTMLFormControlsCollection {
   email: HTMLInputElement;
   password: HTMLInputElement;
-  persistent: HTMLInputElement;
+  passwordConfirmation: HTMLInputElement;
 }
 interface SignInFormElement extends HTMLFormElement {
   readonly elements: FormElements;
@@ -51,6 +54,49 @@ function ColorSchemeToggle(props: IconButtonProps) {
 }
 
 export default function Signup() {
+  const [showAlert, setShowAlert] = React.useState(false)
+  const [alertMessage, setAlertMessage] = React.useState("")
+
+  const navigate = useNavigate()
+
+  const handleSignupButton = (params) => {
+    console.log(params)
+
+    fetch("http://localhost:3001/auth/", {
+      method: "POST",
+      headers: {
+        'Content-Type': 'application/json'
+      },
+      body: JSON.stringify(params),
+    })
+    .then(response => {
+      if (response.status === 422) {
+        return response.json()
+      } else {
+        const uid = response.headers.get('uid')
+        const client = response.headers.get('client')
+        const accessToken = response.headers.get('access-token')
+
+        if (uid && client && accessToken) {
+          localStorage.setItem('uid', uid || "");
+          localStorage.setItem('client', client || "");
+          localStorage.setItem('accessToken', accessToken || "");
+
+          navigate("/dashboard")
+        } else {
+          setAlertMessage("Problema ao obter os headers da resposta!")
+          setShowAlert(true)
+        }
+      }
+    })
+    .then(data => {
+      if (data) {
+        setAlertMessage(data['errors']['full_messages'].join(". "))
+        setShowAlert(true)
+      }
+    })
+  }
+
   return (
     <CssVarsProvider defaultMode="dark" disableTransitionOnChange>
       <CssBaseline />
@@ -99,7 +145,7 @@ export default function Signup() {
               <IconButton variant="soft" color="primary" size="sm">
                 <BadgeRoundedIcon />
               </IconButton>
-              <Typography level="title-lg">Contact Registration</Typography>
+              <Typography level="title-lg">Cadastro de Contatos</Typography>
             </Box>
             <ColorSchemeToggle />
           </Box>
@@ -129,11 +175,12 @@ export default function Signup() {
             <Stack gap={4} sx={{ mb: 2 }}>
               <Stack gap={1}>
                 <Typography component="h1" level="h3">
-                  Sign up
+                  Cadastre-se
                 </Typography>
                 <Typography level="body-sm">
+                  Já tem uma conta?{' '}
                   <Link href="/" level="title-sm">
-                    Sign in!
+                    Entrar
                   </Link>
                 </Typography>
               </Stack>
@@ -152,12 +199,13 @@ export default function Signup() {
                 onSubmit={(event: React.FormEvent<SignInFormElement>) => {
                   event.preventDefault();
                   const formElements = event.currentTarget.elements;
-                  const data = {
-                    email: formElements.email.value,
-                    password: formElements.password.value,
-                    persistent: formElements.persistent.checked,
+                  const params = {
+                    'email': formElements.email.value,
+                    'password': formElements.password.value,
+                    'password_confirmation': formElements.passwordConfirmation.value,
                   };
-                  alert(JSON.stringify(data, null, 2));
+                  
+                  handleSignupButton(params)
                 }}
               >
                 <FormControl required>
@@ -165,36 +213,30 @@ export default function Signup() {
                   <Input type="email" name="email" />
                 </FormControl>
                 <FormControl required>
-                  <FormLabel>Password</FormLabel>
+                  <FormLabel>Senha</FormLabel>
                   <Input type="password" name="password" />
                 </FormControl>
                 <FormControl required>
-                  <FormLabel>Password confirmation</FormLabel>
-                  <Input type="password" name="password_confirmation" />
+                  <FormLabel>Confirme sua senha</FormLabel>
+                  <Input type="password" name="passwordConfirmation" />
                 </FormControl>
                 <Stack gap={4} sx={{ mt: 2 }}>
-                  <Box
-                    sx={{
-                      display: 'flex',
-                      justifyContent: 'space-between',
-                      alignItems: 'center',
-                    }}
-                  >
-                    <Checkbox size="sm" label="Remember me" name="persistent" />
-                    <Link level="title-sm" href="#replace-with-a-link">
-                      Forgot your password?
-                    </Link>
-                  </Box>
                   <Button type="submit" fullWidth>
-                    Sign in
+                    Cadastrar
                   </Button>
+                  {showAlert && (
+                    <Alert 
+                      variant="soft"
+                      color="danger"
+                    >{alertMessage}</Alert>
+                  )}
                 </Stack>
               </form>
             </Stack>
           </Box>
           <Box component="footer" sx={{ py: 3 }}>
             <Typography level="body-xs" textAlign="center">
-              © Your company {new Date().getFullYear()}
+              © Iago Silva {new Date().getFullYear()}
             </Typography>
           </Box>
         </Box>

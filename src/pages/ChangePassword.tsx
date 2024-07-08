@@ -16,13 +16,14 @@ import Stack from '@mui/joy/Stack';
 import DarkModeRoundedIcon from '@mui/icons-material/DarkModeRounded';
 import LightModeRoundedIcon from '@mui/icons-material/LightModeRounded';
 import BadgeRoundedIcon from '@mui/icons-material/BadgeRounded';
-import { useNavigate } from 'react-router-dom';
+import { Password } from '@mui/icons-material';
+import { useNavigate, useSearchParams } from 'react-router-dom';
 import { Alert } from '@mui/joy';
 
 interface FormElements extends HTMLFormControlsCollection {
   email: HTMLInputElement;
   password: HTMLInputElement;
-  persistent: HTMLInputElement;
+  passwordConfirmation: HTMLInputElement;
 }
 interface SignInFormElement extends HTMLFormElement {
   readonly elements: FormElements;
@@ -52,35 +53,60 @@ function ColorSchemeToggle(props: IconButtonProps) {
   );
 }
 
-export default function RecoverPassword() {
+export default function ChangePassword() {
   const [showAlert, setShowAlert] = React.useState(false)
   const [alertMessage, setAlertMessage] = React.useState("")
-  const [alertColor, setAlertColor] = React.useState<'success' | 'danger'>("success")
 
-  const handleRecoverButton = (params) => {
-    fetch("http://localhost:3001/auth/password", {
-      method: "POST",
+  const navigate = useNavigate()
+
+  const [searchParams, setSearchParams] =  useSearchParams();
+
+  const client = searchParams.get("client")
+  const uid = searchParams.get("uid") 
+  const accessToken = searchParams.get("access-token")
+
+	const fetchChangePassword = (params) => { 
+    const headers = { 
+      'client': client || '',
+      'uid': uid || '',
+      'access-token': accessToken || ''
+    }
+
+		fetch("http://localhost:3001/auth/password", {
+      method: "PUT",
       headers: {
-        'Content-Type': 'application/json'
+        'Content-Type': 'application/json',
+				...headers
       },
       body: JSON.stringify(params),
     })
     .then(response => {
-      if (response.status === 404) {
+      if (response.status === 401) {
+        setAlertMessage('Link expirado! Por favor gere outro email de alteração de senha!')
+        setShowAlert(true)
+      }
+      else if (response.status === 422) {
         return response.json()
       } else {
-        setAlertMessage("Um email foi enviado para " + params['email'])
-        setShowAlert(true)
-        setAlertColor('success')
+        if (uid && client && accessToken) {
+          localStorage.setItem('uid', uid || "");
+          localStorage.setItem('client', client || "");
+          localStorage.setItem('accessToken', accessToken || "");
+
+          navigate("/dashboard")
+        }
       }
     })
     .then(data => {
       if (data) {
-        setAlertMessage(data['errors'])
+        setAlertMessage(data['errors']['full_messages'].join('. '))
         setShowAlert(true)
-        setAlertColor('danger')
       }
     })
+	}
+
+  const handleChangePasswordButton = (params) => {
+		fetchChangePassword(params)
   }
 
   return (
@@ -161,11 +187,11 @@ export default function RecoverPassword() {
             <Stack gap={4} sx={{ mb: 2 }}>
               <Stack gap={1}>
                 <Typography component="h1" level="h3">
-                  Recuperar Senha
+                  Alterar senha
                 </Typography>
                 <Typography level="body-sm">
                   <Link href="/" level="title-sm">
-                    Entrar
+                    Sign in!
                   </Link>
                 </Typography>
               </Stack>
@@ -185,27 +211,32 @@ export default function RecoverPassword() {
                   event.preventDefault();
                   const formElements = event.currentTarget.elements;
                   const params = {
-                    email: formElements.email.value,
-                    redirect_url: 'http://localhost:3000/change-password'
+                    'password': formElements.password.value,
+                    'password_confirmation': formElements.passwordConfirmation.value,
                   };
                   
-                  handleRecoverButton(params)
+                  handleChangePasswordButton(params)
                 }}
               >
                 <FormControl required>
-                  <FormLabel>Email</FormLabel>
-                  <Input type="email" name="email" />
+                  <FormLabel>Nova senha</FormLabel>
+                  <Input type="password" name="password" />
                 </FormControl>
-
+                <FormControl required>
+                  <FormLabel>Confirme a nova senha</FormLabel>
+                  <Input type="password" name="passwordConfirmation" />
+                </FormControl>
+                <Stack gap={4} sx={{ mt: 2 }}>
                   <Button type="submit" fullWidth>
-                    Enviar
+                    Alterar senha
                   </Button>
                   {showAlert && (
                     <Alert 
                       variant="soft"
-                      color={alertColor}
+                      color="danger"
                     >{alertMessage}</Alert>
                   )}
+                </Stack>
               </form>
             </Stack>
           </Box>
