@@ -11,3 +11,7 @@ yarn && yarn start
 # Envio de email do Devise
 
 Só acessar [localhost:1080](http://localhost:1080) para ver os emails de recuperação de senha chegando
+
+# Paginação
+
+O sistema mostra 3 contatos por página
