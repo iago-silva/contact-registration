@@ -1,9 +1,12 @@
-import { Autocomplete, Box, Button, DialogContent, DialogTitle, Divider, FormControl, FormLabel, Input, Modal, ModalDialog, Option, Select, Stack } from '@mui/joy';
+import { Alert, Autocomplete, Box, Button, DialogContent, DialogTitle, Divider, FormControl, FormLabel, Input, Modal, ModalDialog, Option, Select, Stack } from '@mui/joy';
 import React, { useEffect, useState } from 'react'
 import { fromAddress, fromLatLng, setKey } from 'react-geocode';
 import { useNavigate } from 'react-router-dom';
 
 function RegisterContactModal({onClose, selectedContact, fetchContacts, modalOpen, setModalOpen}) {
+  const [showAlert, setShowAlert] = React.useState(false)
+  const [alertMessage, setAlertMessage] = React.useState("")
+
   const [name, setName] = useState("")
   const [cpf, setCpf] = useState("")
   const [phone, setPhone] = useState("")
@@ -114,10 +117,22 @@ function RegisterContactModal({onClose, selectedContact, fetchContacts, modalOpe
     .then(response => {
       if (response.status == 401) {
         clean()
+      } else if (response.status == 422) {
+        return response.json()
       } else {
         fetchContacts()
         onClose()
         setModalOpen(false)
+      }
+    })
+    .then(data => {
+      if (data && data['errors']) {
+        Object.keys(data['errors']).forEach(function(key, index) {
+          data['errors'][key] = key + ' ' + data['errors'][key];
+        });        
+
+        setAlertMessage(Object.values(data['errors']).join('. '))
+        setShowAlert(true)
       }
     })
   }
@@ -233,6 +248,14 @@ function RegisterContactModal({onClose, selectedContact, fetchContacts, modalOpe
         <ModalDialog sx={{height: "75%", width: "50%"}}>
           <DialogTitle>{selectedContact?.name || "Novo Contato"} </DialogTitle>
           <DialogContent>
+
+            {showAlert && (
+              <Alert 
+                variant="soft"
+                color="danger"
+              >{alertMessage}</Alert>
+            )}
+
             <form
               onSubmit={(event: React.FormEvent<HTMLFormElement>) => {
                 event.preventDefault();
