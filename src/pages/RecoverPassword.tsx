@@ -164,7 +164,7 @@ export default function RecoverPassword() {
                   Recuperar Senha
                 </Typography>
                 <Typography level="body-sm">
-                  <Link href="/" level="title-sm">
+                  <Link href="/entrar" level="title-sm">
                     Entrar
                   </Link>
                 </Typography>
@@ -186,7 +186,7 @@ export default function RecoverPassword() {
                   const formElements = event.currentTarget.elements;
                   const params = {
                     email: formElements.email.value,
-                    redirect_url: 'http://localhost:3000/change-password'
+                    redirect_url: 'http://localhost:3000/alterar-senha'
                   };
                   
                   handleRecoverButton(params)

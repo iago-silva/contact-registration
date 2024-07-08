@@ -53,11 +53,16 @@ function ColorSchemeToggle(props: IconButtonProps) {
 }
 
 export default function Login() {
-  const navigate = useNavigate()
   const [showAlert, setShowAlert] = React.useState(false)
   const [alertMessage, setAlertMessage] = React.useState("")
 
-  const nagivate = useNavigate()
+  const navigate = useNavigate()
+
+  const client = localStorage.getItem('client') 
+  const uid = localStorage.getItem('uid') 
+  const accessToken = localStorage.getItem('accessToken') 
+
+  console.log(client && uid && !!accessToken)
 
   const handleSigninButton = (params) => {
     fetch("http://localhost:3001/auth/sign_in", {
@@ -80,7 +85,7 @@ export default function Login() {
           localStorage.setItem('client', client || "");
           localStorage.setItem('accessToken', accessToken || "");
 
-          navigate("/dashboard")
+          navigate("/")
         } else {
           setAlertMessage("Problema no login!")
           setShowAlert(true)
@@ -93,6 +98,16 @@ export default function Login() {
         setShowAlert(true)
       }
     })
+  }
+
+  React.useEffect(() => {
+    if (client && uid && accessToken) {
+      navigate('/')
+    }
+  })
+
+  if (client && uid && accessToken) {
+    return null
   }
 
   return (
@@ -177,7 +192,7 @@ export default function Login() {
                 </Typography>
                 <Typography level="body-sm">
                   Novo?{' '}
-                  <Link href="/signup" level="title-sm">
+                  <Link href="/cadastrar" level="title-sm">
                     Cadastre-se
                   </Link>
                 </Typography>
@@ -222,7 +237,7 @@ export default function Login() {
                     }}
                   >
                     <div></div>
-                    <Link level="title-sm" href="recover-passoword">
+                    <Link level="title-sm" href="recuperar-senha">
                       Esqueceu sua senha?
                     </Link>
                   </Box>

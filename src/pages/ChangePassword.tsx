@@ -65,6 +65,24 @@ export default function ChangePassword() {
   const uid = searchParams.get("uid") 
   const accessToken = searchParams.get("access-token")
 
+  const clean = () => {
+    localStorage.setItem('uid', "")
+    localStorage.setItem('client', "")
+    localStorage.setItem('accessToken', "")
+    
+    navigate("/entrar")
+  }
+
+  React.useEffect(() => {
+    if (!client || !uid || !accessToken) {
+      navigate('/')
+    }
+  })
+
+  if (!client || !uid || !accessToken) {
+    return null
+  }
+
 	const fetchChangePassword = (params) => { 
     const headers = { 
       'client': client || '',
@@ -93,7 +111,7 @@ export default function ChangePassword() {
           localStorage.setItem('client', client || "");
           localStorage.setItem('accessToken', accessToken || "");
 
-          navigate("/dashboard")
+          navigate("/")
         }
       }
     })

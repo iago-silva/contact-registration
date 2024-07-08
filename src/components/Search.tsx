@@ -23,7 +23,7 @@ export default function Search({contacts, searchTerm, setSearchTerm, fetchContac
           Pesquisar
         </Button>
       </Stack>
-      <Typography level="body-sm">{contacts.length} contatos</Typography>
+      <Typography level="body-sm">{contacts?.length} contatos</Typography>
     </div>
   );
 }

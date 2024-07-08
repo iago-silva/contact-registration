@@ -26,18 +26,14 @@ export default function Dashboard() {
   const client = localStorage.getItem('client') 
   const uid = localStorage.getItem('uid') 
   const accessToken = localStorage.getItem('accessToken') 
+  console.log(client, uid, accessToken)
 
-  // const map = useMap();
-
-  // React.useEffect(() => {
-  //   if (!map) return;
-
-  //   map.
-  // }, [map]);
-
-
-  if (!client || !uid || !accessToken) {
-    navigate("/")
+  const clean = () => {
+    localStorage.setItem('uid', "")
+    localStorage.setItem('client', "")
+    localStorage.setItem('accessToken', "")
+    
+    navigate("/entrar")
   }
 
   const fetchContacts = () => {
@@ -52,11 +48,7 @@ export default function Dashboard() {
     })
     .then(response => {
       if (response.status == 401) {
-        localStorage.setItem('uid', "")
-        localStorage.setItem('client', "")
-        localStorage.setItem('accessToken', "")
-  
-        navigate("/")
+        clean()
       } else {
         return response.json()
       }
@@ -76,6 +68,10 @@ export default function Dashboard() {
 
 
   const map = useMap()
+
+  if (!client || !uid || !accessToken) {
+    clean()
+  }
 
   const cards = contacts?.map(contact => {
     const position = {lat: parseFloat(contact['address']['latitude']), lng: parseFloat(contact['address']['longitude'])}

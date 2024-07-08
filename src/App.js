@@ -11,11 +11,11 @@ function App() {
     <div className="App">
       <BrowserRouter>
         <Routes>
-          <Route path="/" element={<Login />} />
-          <Route path="/signup" element={<Signup />} />
-          <Route path="/recover-passoword" element={<RecoverPassword />} />
-          <Route path="/change-password" element={<ChangePassword />} />
-          <Route path="/dashboard" element={<Dashboard />} />
+          <Route path="/entrar" element={<Login />} />
+          <Route path="/cadastrar" element={<Signup />} />
+          <Route path="/recuperar-senha" element={<RecoverPassword />} />
+          <Route path="/alterar-senha" element={<ChangePassword />} />
+          <Route path="/" element={<Dashboard />} />
         </Routes>
       </BrowserRouter>
     </div>

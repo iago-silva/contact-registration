@@ -29,6 +29,14 @@ function RegisterContactModal({fetchContacts, modalOpen, setModalOpen}) {
   const uid = localStorage.getItem('uid') 
   const accessToken = localStorage.getItem('accessToken') 
 
+  const clean = () => {
+    localStorage.setItem('uid', "")
+    localStorage.setItem('client', "")
+    localStorage.setItem('accessToken', "")
+
+    navigate("/entrar")
+  }
+
   const registerInApi = async () => {
     const params = {
       contact: {
@@ -61,18 +69,11 @@ function RegisterContactModal({fetchContacts, modalOpen, setModalOpen}) {
     })
     .then(response => {
       if (response.status == 401) {
-        localStorage.setItem('uid', "")
-        localStorage.setItem('client', "")
-        localStorage.setItem('accessToken', "")
-  
-        navigate("/")
+        clean()
       } else {
-        return response.json()
+        fetchContacts()
+        setModalOpen(false)
       }
-    })
-    .then(data => {
-      fetchContacts()
-      setModalOpen(false)
     })
   }
 
@@ -90,11 +91,7 @@ function RegisterContactModal({fetchContacts, modalOpen, setModalOpen}) {
     })
     .then(response => {
       if (response.status == 401) {
-        localStorage.setItem('uid', "")
-        localStorage.setItem('client', "")
-        localStorage.setItem('accessToken', "")
-  
-        navigate("/")
+        clean()
       } else {
         return response.json()
       }

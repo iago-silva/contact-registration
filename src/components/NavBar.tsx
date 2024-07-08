@@ -28,7 +28,7 @@ export default function HeaderSection() {
     localStorage.setItem('client', "")
     localStorage.setItem('accessToken', "")
 
-    navigate("/")
+    navigate("/entrar")
   }
 
   const handleDeleteAccount = () => {
@@ -64,7 +64,6 @@ export default function HeaderSection() {
       clean()
     })
   }
-
 
   return (
     <Box

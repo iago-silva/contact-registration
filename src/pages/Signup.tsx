@@ -82,7 +82,7 @@ export default function Signup() {
           localStorage.setItem('client', client || "");
           localStorage.setItem('accessToken', accessToken || "");
 
-          navigate("/dashboard")
+          navigate("/")
         } else {
           setAlertMessage("Problema ao obter os headers da resposta!")
           setShowAlert(true)
@@ -179,7 +179,7 @@ export default function Signup() {
                 </Typography>
                 <Typography level="body-sm">
                   Já tem uma conta?{' '}
-                  <Link href="/" level="title-sm">
+                  <Link href="/entrar" level="title-sm">
                     Entrar
                   </Link>
                 </Typography>
